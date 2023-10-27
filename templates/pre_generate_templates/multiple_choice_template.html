@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ question_text }}</title>
+</head>
+<body>
+
+<div class="questionnaire-container">
+	<div class="question-container">
+	    <div class="context">
+	        {{ context }}
+	    </div>
+	    <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">
+	        <div class="question">
+				<p>{{ question_text }}</p>
+			</div>
+	        <div class="answers">
+			    {% for option in options %}
+				    <input type="radio" name="answer" value="{{ option }}" id="answer{{ loop.index }}"
+				           {% if loop.first %}required{% endif %}
+				           {% if option == saved_answer %}checked{% endif %}>
+				    <label for="answer{{ loop.index }}">{{ option }}</label>
+				    <br>
+				{% endfor %}
+			</div>
+			<div class="navigation">
+			    <!-- Back Button -->
+			    {% if question_number > 1 %}
+			        <a href="{{ url_for('question', question_number=question_number - 1) }}" class="button" id="next-button">Back</a>
+			    {% endif %}
+			
+			    <!-- Next Button -->
+			    {% if question_number < total_questions %}
+					<button type="submit" name="action" value="Next" class="button" id="next-button">Next</button>
+				{% else %}
+					<button type="submit" name="action" value="Submit" class="button" id="submit-button">Submit</button>
+				{% endif %}
+			</div>
+	    </form>
+	</div>
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
