@@ -12,10 +12,10 @@
 	    <div class="context">
 	        {{ context }}
 	    </div>
-	    <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">
-	        <div class="question">
-				<p>{{ question_text }}</p>
-			</div>
+		<div class="question">
+			<p>{{ question_text }}</p>
+		</div>
+	    <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">    
 	        <div class="answers">
 			    {% for option in options %}
 				    <input type="radio" name="answer" value="{{ option }}" id="answer{{ loop.index }}"
@@ -27,16 +27,15 @@
 			</div>
 			<div class="navigation">
 			    <!-- Back Button -->
-			    {% if question_number > 1 %}
-			        <a href="{{ url_for('question', question_number=question_number - 1) }}" class="button" id="next-button">Back</a>
-			    {% endif %}
+
+				{% if question_number/1000  > 1 %}
+					<a href="{{ url_for('question', question_number=previous_question_number) }}" class="button" id="back-button">Back</a>
+				{% endif %}
+
 			
 			    <!-- Next Button -->
-			    {% if question_number < total_questions %}
-					<button type="submit" name="action" value="Next" class="button" id="next-button">Next</button>
-				{% else %}
-					<button type="submit" name="action" value="Submit" class="button" id="submit-button">Submit</button>
-				{% endif %}
+				<button type="submit" name="action" value="Next" class="button" id="next-button">Next</button>
+
 			</div>
 	    </form>
 	</div>

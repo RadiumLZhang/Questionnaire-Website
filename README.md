@@ -66,6 +66,7 @@ Rating Scale;Thank you for saving me from those North Koreans man they had me lo
 Questionnaire-Website/        # Root directory of project
 |-- .git/                     # Git configuration and source directory
 |-- .gitignore                # List of files and directories ignored by Git
+|-- app.py                   	# Main server-side script
 |-- assets/                   # All assets like images, fonts etc.
 |   |-- images/
 |   |-- fonts/
@@ -79,8 +80,6 @@ Questionnaire-Website/        # Root directory of project
 |   |-- index.html            # Main HTML template
 |   |-- questionnaire.html    # Questionnaire page template
 |-- vendor/                   # Third-party libraries and frameworks
-|-- server/                   # Server-side code (e.g., Flask or Django files)
-|   |-- app.py                # Main server-side script
 |-- tests/                    # Test scripts and data
 |   |-- test_script.js
 |-- README.md                 # Project description and instructions
@@ -95,6 +94,10 @@ Questionnaire-Website/        # Root directory of project
 
 1. Install Necessary Libraries:
    1. python
-   2. pip install pandas jinja2
+   2. pip install pandas jinja2 flask flask_sqlalchemy
 2. fill out the questionnaire.cvs and run the code. generate html
-3. 
+
+```
+python3 app.py
+```
+
