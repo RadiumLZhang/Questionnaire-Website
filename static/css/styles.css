@@ -1,0 +1,104 @@
+/* styles.css */
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+/* Container Styles */
+.questionnaire-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px;
+    width: 50%;  /* Adjust width as needed */
+    max-width: 800px;  /* Adjust max-width as needed */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.context,
+.question,
+.answer,
+.navigation {
+    margin-bottom: 20px;  /* Space out sections */
+}
+
+/* Style the context section */
+.context {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Style the question section */
+.question {
+    font-size: 1.1em;
+    margin-bottom: 10px;  /* Space below question text */
+}
+
+
+/* Style the answer section */
+.answer input[type="radio"] + label {
+    margin-bottom: 10px;  /* Space below each item */
+}
+
+/* Style for textarea */
+.answer textarea {
+    width: 90%; /* Full-width */
+    height: 200px; /* Set a fixed height or use min-height for a minimum height */
+    padding: 10px; /* Padding inside the textarea */
+    margin-bottom: 10px; /* Space below the textarea */
+    border: 1px solid #ccc; /* Border color */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Text size */
+    outline: none; /* Remove outline */
+    resize: vertical; /* Allow vertical resizing, disallow horizontal resizing */
+}
+
+/* Change border color on focus */
+.answer textarea:focus {
+    border-color: #008CBA; /* Border color on focus */
+    box-shadow: 0 0 5px rgba(0, 140, 186, 0.5); /* Shadow effect on focus */
+}
+
+/* Optional: Add some transition for smooth effect */
+.answer textarea {
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+
+.answer label {
+    margin-left: 10px;
+}
+
+.answer input[type="radio"] {
+    display: inline-block;
+    margin-right: 10px;  /* Space between radio button and label */
+}
+
+
+.navigation {
+    margin-top: 20px; /* Space above the buttons */
+}
+
+/* Style the navigation section */
+.navigation .button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #008CBA;  /* Blue background */
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;  /* Rounded corners */
+}
+
+.navigation .button:hover {
+    background-color: #005f5f;  /* Darker blue on hover */
+}
+
+
+
+
+
