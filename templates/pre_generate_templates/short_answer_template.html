@@ -17,22 +17,19 @@
     </div>
     <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">
 		
-		<div class="answer">		
-    		<textarea name="answer" id="answer" minlength="{{ char_limit_range[0] }}" maxlength="{{ char_limit_range[1] }}" value="{{ saved_answer }}" required></textarea>
+		<div class="answer">
+			<textarea name="answer" id="answer" minlength="{{ char_limit_range[0] }}" maxlength="{{ char_limit_range[1] }}" required>{% raw %}{{ saved_answer }}{% endraw %}</textarea>
 		</div>
 		<div class="navigation">
 			{% raw %}
-			<!-- Back Button -->
-			{% if prev_question_number %}
-			<a href="{{ url_for('question', question_number=prev_question_number) }}" class="button" id="back-button">Back</a>
-			{% endif %}
+				<!-- Back Button -->
+				{% if prev_question_number %}
+					<a href="{{ url_for('question', question_number=prev_question_number) }}" class="button" id="back-button">Back</a>
+				{% endif %}
 
-			<!-- Next Button -->
-			{% if next_question_number %}
-			<a href="{{ url_for('question', question_number=next_question_number) }}" class="button" id="next-button">Next</a>
-			{% else %}
-			<button type="submit" name="action" value="Submit" class="button" id="submit-button">Submit</button>
-			{% endif %}
+				<!-- Next Button -->
+				<button type="submit" name="action" value="Submit" class="button" id="submit-button">Next</button>
+
 			{% endraw %}
 
 
