@@ -347,7 +347,7 @@ def thank_you():
 	return "Thank you for submitting your responses!"
 
 
-TEST_ENVIRONMENT = True
+TEST_ENVIRONMENT = False
 
 if __name__ == '__main__':
 	with app.app_context():
@@ -355,4 +355,4 @@ if __name__ == '__main__':
 	if TEST_ENVIRONMENT:
 		app.run(debug=True)
 	else:
-		app.run(host="0.0.0.0", port=80, debug=True)
+		app.run(host="0.0.0.0", port=5000, debug=False)
