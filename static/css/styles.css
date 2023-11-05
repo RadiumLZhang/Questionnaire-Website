@@ -82,20 +82,51 @@ body {
 
 .navigation {
     margin-top: 20px; /* Space above the buttons */
+    justify-content: center;
+    display: flex;
+    gap: 10px; /* Space between buttons */
 }
 
 /* Style the navigation section */
-.navigation .button {
+.button {
     padding: 10px 20px;
     border: none;
     background-color: #008CBA;  /* Blue background */
     color: white;
     cursor: pointer;
     border-radius: 4px;  /* Rounded corners */
+    text-decoration: none;  /* Remove underline from the anchor tag */
+    display: inline-block;  /* Make the anchor tag behave like a button */
 }
 
-.navigation .button:hover {
+.button:hover {
     background-color: #005f5f;  /* Darker blue on hover */
+}
+
+
+/* survey_id_entry_page*/
+/* Styling for the label */
+label[for="survey_id"] {
+    font-size: 16px;        /* Slightly larger font size */
+    font-weight: bold;      /* Bold font weight */
+    display: block;         /* Display as block to ensure it takes the full width */
+    margin-bottom: 10px;    /* Space below the label */
+}
+
+/* Styling for the number input field */
+#survey_id {
+    width: 100%;            /* Take the full width of the container */
+    padding: 8px 10px;      /* Padding for a comfortable input space */
+    border: 1px solid #ccc; /* Border to distinguish the input */
+    border-radius: 4px;     /* Slight rounded corners */
+    background-color: #f9f9f9; /* Subtle background color */
+    font-size: 14px;        /* Font size for the input */
+    box-sizing: border-box; /* To ensure padding and border are included in width */
+}
+
+#survey_id:focus {
+    border-color: #008CBA;  /* Change border color on focus for emphasis */
+    outline: none;          /* Remove default browser outline */
 }
 
 
