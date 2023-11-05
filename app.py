@@ -12,8 +12,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///responses.db'
 db = SQLAlchemy(app)
 
 # Load CSV file
-data = pd.read_csv('data/questions.csv', delimiter=';')
-survey_numbers_map = OrderedDict()
+
+main_survey_numbers_map = OrderedDict()
 main_question_flow = []
 MAX_QUESTIONS = 1000
 
@@ -61,7 +61,7 @@ def enter_survey_id():
 		db.session.commit()
 
 		# Generate random question set and store in database
-		question_ids = generate_question_ids(survey_id)
+		question_ids = generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow)
 		random_question_set = RandomQuestionSet(survey_id=survey_id, question_ids=','.join(map(str, question_ids)))
 		db.session.add(random_question_set)
 		db.session.commit()
@@ -160,7 +160,8 @@ def question(question_number):
 
 @app.route('/generate')
 def generate_html():
-	main_question_flow = []
+
+	data = pd.read_csv('data/questions.csv', delimiter=';')
 	# Loop through each question, render HTML, and save to file
 	# record the question working flow in question_flow
 	for index, row in data.iterrows():
@@ -213,17 +214,21 @@ def generate_html():
 	with open(f'output/question_flow.txt', 'w') as file:
 		file.write(str(main_question_flow))
 
+	# write the survey_numbers_map to file
+	with open(f'output/survey_numbers_map.txt', 'w') as file:
+		file.write(str(main_survey_numbers_map))
+
 	return "HTML files generated successfully."
 
 
 def generate_sub_html(question_file):
-	if question_file in survey_numbers_map:
+	if question_file in main_survey_numbers_map:
 		return
 	question_pool = []
 
-	if not question_file in survey_numbers_map:
-		survey_numbers_map[question_file] = question_pool
-	index_of_key: int = list(survey_numbers_map.keys()).index(question_file)
+	if not question_file in main_survey_numbers_map:
+		main_survey_numbers_map[question_file] = question_pool
+	index_of_key: int = list(main_survey_numbers_map.keys()).index(question_file)
 	base_question_number = (index_of_key + 1) * MAX_QUESTIONS
 
 	# Load CSV file
@@ -268,16 +273,26 @@ def generate_sub_html(question_file):
 			file.write(html_content)
 
 		question_pool.append(question_number)
-	survey_numbers_map[question_file] = question_pool
+	main_survey_numbers_map[question_file] = question_pool
 
 
-def generate_question_ids(survey_id):
+
+def generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow):
 	question_flow = main_question_flow
+	survey_numbers_map = main_survey_numbers_map
 	# if question_flow is empty list, read the question flow from file
 	if not question_flow:
 		# read the question flow from file and store in question_flow
 		with open(f'output/question_flow.txt', 'r') as file:
 			question_flow = eval(file.read())
+			main_question_flow = question_flow
+
+	if not survey_numbers_map:
+		# read the survey_numbers_map from file and store in survey_numbers_map
+		with open(f'output/survey_numbers_map.txt', 'r') as file:
+			survey_numbers_map = eval(file.read())
+			main_survey_numbers_map = survey_numbers_map
+
 	# iterate through question_flow and generate question_ids
 	question_ids = []
 	for element in question_flow:
