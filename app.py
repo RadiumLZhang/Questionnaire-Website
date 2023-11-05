@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+
 from datetime import datetime
 from collections import OrderedDict
 import random
@@ -131,10 +132,7 @@ def question(question_number):
 
 		# Save answer to database
 		# Commit the changes
-		try:
-			db.session.commit()
-		except SQLAlchemy.exc.IntegrityError:
-			db.session.rollback()
+		db.session.commit()
 
 		if next_question_number:
 			return redirect(url_for('question', question_number=next_question_number))
@@ -143,10 +141,7 @@ def question(question_number):
 			survey = Survey.query.filter_by(survey_id=survey_id).first()
 			if survey:
 				survey.completion_timestamp = datetime.utcnow()
-				try:
-					db.session.commit()
-				except SQLAlchemy.exc.IntegrityError:
-					db.session.rollback()
+				db.session.commit()
 			return redirect(url_for('thank_you'))
 
 
@@ -154,14 +149,13 @@ def question(question_number):
 
 		# Retrieve saved answer from database
 		answer = Answer.query.filter_by(survey_id=survey_id, question_id=question_number).first()
+		saved_answer = ''
 		if answer:
 			saved_answer = answer.answer_text
-		else:
-			saved_answer = None
+
 
 		return render_template(f'question_{question_number}.html', next_question_number=next_question_number,
-	                       prev_question_number=prev_question_number, question_number=question_number,
-	                       saved_answer=saved_answer)
+	                       prev_question_number=prev_question_number, question_number=question_number, saved_answer = saved_answer)
 
 
 @app.route('/generate')
@@ -338,7 +332,7 @@ def thank_you():
 	return "Thank you for submitting your responses!"
 
 
-TEST_ENVIRONMENT = False
+TEST_ENVIRONMENT = True
 
 if __name__ == '__main__':
 	with app.app_context():
