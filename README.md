@@ -66,10 +66,6 @@ For developers looking to contribute or understand the technical intricacies:
 
 3. Follow the instructions in the [User Guide](user-guide.md) for setup and usage.
 
-## Contributing
-
-We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
