@@ -26,15 +26,20 @@
 				{% endfor %}
 			</div>
 			<div class="navigation">
-			    <!-- Back Button -->
 
-				{% if question_number/1000  > 1 %}
-					<a href="{{ url_for('question', question_number=previous_question_number) }}" class="button" id="back-button">Back</a>
+
+				<!-- Back Button -->
+				{% if prev_question_number %}
+				<a href="{{ url_for('question', question_number=prev_question_number) }}" class="button" id="back-button">Back</a>
 				{% endif %}
 
-			
-			    <!-- Next Button -->
-				<button type="submit" name="action" value="Next" class="button" id="next-button">Next</button>
+				<!-- Next Button -->
+				{% if next_question_number %}
+				<a href="{{ url_for('question', question_number=next_question_number) }}" class="button" id="next-button">Next</a>
+				{% else %}
+				<button type="submit" name="action" value="Submit" class="button" id="submit-button">Submit</button>
+				{% endif %}
+
 
 			</div>
 	    </form>
