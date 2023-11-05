@@ -222,13 +222,21 @@ class Answer(db.Model):
 
 	__table_args__ = (db.UniqueConstraint('survey_id', 'question_id', name='uq_survey_question'),)
 
-	
-	
+
+TEST_ENVIRONMENT = False
+
 @app.route('/thank_you')
 def thank_you():
     return "Thank you for submitting your responses!"
 	
 if __name__ == '__main__':
+
     with app.app_context():
         db.create_all()  # Create tables on startup
-    app.run(debug=True)
+
+	if TEST_ENVIRONMENT:
+		app.run(debug=True)
+    else:
+        app.run(host="0.0.0.0", port=5000, debug=True)
+
+
