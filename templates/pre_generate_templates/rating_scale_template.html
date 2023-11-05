@@ -24,6 +24,7 @@
 		    {% endfor %}
 		</div>
 		<div class="navigation">
+			{% raw %}
 			<!-- Back Button -->
 			{% if prev_question_number %}
 			<a href="{{ url_for('question', question_number=prev_question_number) }}" class="button" id="back-button">Back</a>
@@ -35,6 +36,7 @@
 			{% else %}
 			<button type="submit" name="action" value="Submit" class="button" id="submit-button">Submit</button>
 			{% endif %}
+			{% endraw %}
 
 
 		</div>

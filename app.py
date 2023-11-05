@@ -338,7 +338,7 @@ def thank_you():
 	return "Thank you for submitting your responses!"
 
 
-TEST_ENVIRONMENT = True
+TEST_ENVIRONMENT = False
 
 if __name__ == '__main__':
 	with app.app_context():
