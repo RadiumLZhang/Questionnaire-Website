@@ -1,103 +1,75 @@
 # Questionnaire-Website
 
-## 1. Structure of the Questionnaire File
+`Questionnaire-Website` is designed to allow users to define, manage, and deploy questionnaires seamlessly. The platform offers a unique approach by leveraging CSV files to define questionnaires.
 
-The Questionnaire File is a structured document utilized to capture a variety of question types, responses, and accompanying contextual remarks. The document utilizes CSV (Comma-Separated Values) format with a unique delimiter system to effectively distinguish between individual data entries.
+## Documentation
 
-### File Format
+### [User Guide](user-guide.md)
 
-- **File Extension**: .csv
-- **Cell Delimiter**: Semicolon (;)
-- **Sub-Cell Delimiter**: Comma (,)
+The User Guide provides step-by-step instructions and insights into using the platform effectively:
 
-### Table Structure
+1. **Using the CSV File to Define the Questionnaire**
+   - A. File Specifications
+   - B. Delimiter Usage
+   - C. Question Types
+     - i. Multiple Choice
+     - ii. Short Answer
+     - iii. Rating Scale
+     - iv. Random Question Set
+   - D. Usage Tips
+   - E. Example
 
-The questionnaire file comprises four columns:
+2. **Starting a New Project**
+   - A. Steps to Reset
 
-1. **Type**: The type of question.
-2. **Context**: Any contextual remarks or additional information regarding the question.
-3. **Question**: The question prompt.
-4. **Response**: The response format or options available.
+3. **Environment Setup Guide**
+   - A. Install Required Software and Libraries
+     - i. Install Python
+     - ii. Set Up Virtual Environment
+     - iii. Install Required Python Libraries
+   - B. Set Up the Application
+     - i. Configure Application Data
+     - ii. Run the Application
+   - C. Set Up Web Server
+     - i. Install Nginx
+     - ii. Start and Enable Nginx
+     - iii. Install Gunicorn
+   - D. DigitalOcean DNS Configuration
+     - i. Pointing to DigitalOcean Name Servers
+     - ii. Managing DNS Records
 
-| Column   | Description                                                  |
-| -------- | ------------------------------------------------------------ |
-| Type     | Specifies the question type e.g., Multiple Choice, Short Answer, Rating Scale. |
-| Context  | Provides additional context or remarks about the question.   |
-| Question | Contains the question to be answered.                        |
-| Response | Defines the response format or lists the response options.   |
+### [Developer Guide](developer-guide.md)
 
-### Delimiter Usage
+For developers looking to contribute or understand the technical intricacies:
 
-![image-20231024222143031](/Users/radium/Library/Application Support/typora-user-images/image-20231024222143031.png)
+1. **Structure of Project**
+2. **Back-End Setting**
+   - A. Using a Custom Domain without Port Specification
+     - Setting up Nginx for Reverse Proxy
+   - B. Run the Flask App on a VPS
+3. **Database Documentation**
+   - A. Overview
+   - B. Tables
+   - C. Relationships
 
-- **Primary Delimiter (Cell Delimiter)**: Semicolons (`;`) are utilized to separate each cell within a row. 
-- **Secondary Delimiter (Sub-Cell Delimiter)**: Commas (`,`) are utilized to separate sub-elements within a cell, notably within the Response column.
-- **Quotation Marks**: If a semicolon or comma is a part of the text within a cell (in Context or Question columns), enclose the entire text within double quotation marks (`" "`). The program will then recognize these characters as text rather than delimiters.
+## Getting Started
 
-### Example
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your_username/Questionnaire-Website.git
+   ```
 
-#### Sample Row
+2. Navigate to the project directory:
+   ```bash
+   cd Questionnaire-Website
+   ```
 
-```plaintext
-Multiple Choice;These chinese eats Koalas too?? wtf I wish all those eaters are dead!!!!;What is your favorite color?;Red,Green,Blue,Yellow
-```
+3. Follow the instructions in the [User Guide](user-guide.md) for setup and usage.
 
-- **Type**: Multiple Choice
-- **Context**: These chinese eats Koalas too?? wtf I wish all those eaters are dead!!!!
-- **Question**: What is your favorite color?
-- **Response**: Red,Green,Blue,Yellow
+## Contributing
 
-#### Sample File
+We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md) for details.
 
-![image-20231024222222012](/Users/radium/Library/Application Support/typora-user-images/image-20231024222222012.png)
+## License
 
-```plaintext
-Type;Context;Question;Response
-Multiple Choice;These chinese eats Koalas too?? wtf I wish all those eaters are dead!!!!;What is your favorite color?;Red,Green,Blue,Yellow
-Short Answer;If not take down the Chinese Communist Party ,various viruses will follow, because this virus is the CCP biological and chemical weapon, the CCP is poisoning the world, please don't be silent.;Please describe your ideal vacation.;50,max
-Rating Scale;Thank you for saving me from those North Koreans man they had me locked up trying to force feed me corona virus.;Rate 1-10 blablah;1,10
-```
-
-
-
-## 2. Structure of Project
-
-```toml
-Questionnaire-Website/        # Root directory of project
-|-- .git/                     # Git configuration and source directory
-|-- .gitignore                # List of files and directories ignored by Git
-|-- app.py                   	# Main server-side script
-|-- assets/                   # All assets like images, fonts etc.
-|   |-- images/
-|   |-- fonts/
-|-- css/                      # Stylesheets directory
-|   |-- styles.css            # Main stylesheet
-|-- js/                       # JavaScript files directory
-|   |-- script.js             # Main JavaScript file
-|-- data/                     # Data files (e.g., CSV file)
-|   |-- questions.csv
-|-- templates/                # HTML templates directory
-|   |-- index.html            # Main HTML template
-|   |-- questionnaire.html    # Questionnaire page template
-|-- vendor/                   # Third-party libraries and frameworks
-|-- tests/                    # Test scripts and data
-|   |-- test_script.js
-|-- README.md                 # Project description and instructions
-|-- LICENSE                   # License information
-```
-
-
-
-
-
-## User Guide
-
-1. Install Necessary Libraries:
-   1. python
-   2. pip install pandas jinja2 flask flask_sqlalchemy
-2. fill out the questionnaire.cvs and run the code. generate html
-
-```
-python3 app.py
-```
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
