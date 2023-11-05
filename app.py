@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from collections import OrderedDict
+import random
 import pandas as pd
 
 app = Flask(__name__)
@@ -9,95 +12,165 @@ db = SQLAlchemy(app)
 
 # Load CSV file
 data = pd.read_csv('data/questions.csv', delimiter=';')
-question_data_set = []
-question_flow = []
+survey_numbers_map = OrderedDict()
+main_question_flow = []
 MAX_QUESTIONS = 1000
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	if request.method == 'POST':
-		session['survey_id'] = request.form['survey_id']  # Store survey_id in session
+	if request.method == 'GET':
+		return render_template('survey_id_entry.html')
+	elif session['survey_id']:
 		return redirect(url_for('question', question_number=1))
-	return render_template('survey_id_entry.html')
+
 
 @app.route('/enter_survey_id', methods=['GET', 'POST'])
 def enter_survey_id():
 	if request.method == 'POST':
 		survey_id = request.form['survey_id']
 		session['survey_id'] = survey_id  # Store survey_id in session
-		# Check if survey_id already exists
-		existing_survey = Survey.query.filter_by(survey_id=survey_id).first()
 
-		if existing_survey:
-			# Check if the survey has already been completed
-			if existing_survey.completion_timestamp:
-				return "Error: This survey has already been completed." #TODO
-			# Check if the survey has already been started
-			if existing_survey.start_timestamp:
-				# Check if the survey has a random question set
-				random_question_set = RandomQuestionSet.query.filter_by(survey_id=survey_id).first()
-				if random_question_set:
-					# Load the random question set
-					question_data_set = random_question_set.question_ids.split(',')
-				else:
-					# Generate the unique question set for this participant
-					unique_question_set = []
-					for question in question_flow:
-						question_data_set.append(question)
-				return redirect(url_for('question', question_number=1))
-			else:
-				# Update the start timestamp
-				existing_survey.start_timestamp = datetime.utcnow()
+		survey = Survey.query.filter_by(survey_id=survey_id).first()
+		# [1] if survey is completed, redirect to thank you page
+		if survey and survey.completion_timestamp:
+			return redirect(url_for('thank_you'))
+		# [2] if survey is not completed, redirect to the next question
+		elif survey and survey.start_timestamp and not survey.completion_timestamp:
+			# find the current question number, by read the answers table and question
+			random_question_set = RandomQuestionSet.query.filter_by(survey_id=survey_id).first()
+			if random_question_set:
+				question_ids = random_question_set.question_ids.split(',')
+				session['question_ids'] = question_ids
+				answers = Answer.query.filter_by(survey_id=survey_id).all()
+
+				# find the first element in the question_ids which is not in answers
+				for question_id in question_ids:
+					if int(question_id) not in [answer.question_id for answer in answers]:
+						return redirect(url_for('question', question_number=question_id))
+
+				survey.completion_timestamp = datetime.utcnow()
 				db.session.commit()
+				return redirect(url_for('thank_you'))
 
-
-		else:
-			# generate the unique question set for this participant
-			unique_question_set = []
-			for question in question_flow:
-				question_data_set.append(question)
-
-		return redirect(url_for('question', question_number=1))
-	return render_template('survey_id_entry.html')
-@app.route('/question/<question_number>', methods=['GET', 'POST'])
-def question(question_number):	
-	survey_id = session.get('survey_id')
-	if request.method == 'POST':
-		action = request.form.get('action')
-		answer = request.form.get('answer') or request.form.get('rating')
-		if not survey_id:
-			# Handle the case where there is no survey_id in the session
-			return redirect(url_for('enter_survey_id'))
-
-		# Check if a response already exists
-		existing_response = Response.query.filter_by(survey_id=survey_id, question_number=question_number).first()
-		if existing_response:
-			existing_response.answer = answer  # Update existing answer
-		else:
-			response = Response(survey_id=survey_id, question_number=question_number, answer=answer)  # New answer
-			db.session.add(response)
-			
+		# [3] if survey is not started, record the start-timestamp
+		start_timestamp = datetime.utcnow()
+		survey = Survey(survey_id=survey_id, start_timestamp=start_timestamp)
+		db.session.add(survey)
 		db.session.commit()
 
-		if action == 'Next':
-			next_question_number = question_number + 1
+		# Generate random question set and store in database
+		question_ids = generate_question_ids(survey_id)
+		random_question_set = RandomQuestionSet(survey_id=survey_id, question_ids=','.join(map(str, question_ids)))
+		db.session.add(random_question_set)
+		db.session.commit()
+		question_ids = random_question_set.question_ids.split(',')
+		session['question_ids'] = question_ids
+
+		# redirect to the first question
+		return redirect(url_for('question', question_number=1))
+
+
+def next_question(current_question_number):
+	survey_id = session.get('survey_id')
+	question_ids = session.get('question_ids')
+	if question_ids:
+		# find the in the question_ids, the next question number
+		index_of_current_question = question_ids.index(current_question_number)
+		if index_of_current_question < len(question_ids) - 1:
+			next_question_number = question_ids[index_of_current_question + 1]
+			return next_question_number
+		else:
+			return None
+	else:
+		# print error message
+		print("Error: random_question_set is None")
+		return None
+
+
+def prev_question(current_question_number):
+	survey_id = session.get('survey_id')
+	question_ids = session.get('question_ids')
+
+	if question_ids:
+		# find the in the question_ids, the next question number
+		index_of_current_question = question_ids.index(current_question_number)
+		if index_of_current_question > 0:
+			prev_question_number = question_ids[index_of_current_question - 1]
+			return prev_question_number
+		else:
+			return None
+	else:
+		# print error message
+		print("Error: random_question_set is None")
+		return None
+
+
+@app.route('/question/<question_number>', methods=['GET', 'POST'])
+def question(question_number):
+	session['current_question_number'] = question_number
+	survey_id = session.get('survey_id')
+	next_question_number = next_question(question_number)
+	prev_question_number = prev_question(question_number)
+
+	if request.method == 'POST':
+		# Retrieve answer from form
+		answer_text = request.form['answer']
+
+		existing_answer = Answer.query.filter_by(survey_id=survey_id, question_id=question_number).first()
+
+		if existing_answer:
+			# Update the existing answer
+			existing_answer.answer_text = answer_text
+			existing_answer.answer_timestamp = datetime.utcnow()
+		else:
+			# Create a new answer record
+			answer = Answer(survey_id=survey_id, question_id=question_number, answer_text=answer_text,
+			                answer_timestamp=datetime.utcnow())
+			db.session.add(answer)
+
+		# Save answer to database
+		# Commit the changes
+		try:
+			db.session.commit()
+		except SQLAlchemy.exc.IntegrityError:
+			db.session.rollback()
+
+		if next_question_number:
 			return redirect(url_for('question', question_number=next_question_number))
-		elif action == 'Submit':
+		else:
+			# update the survey completion_timestamp
+			survey = Survey.query.filter_by(survey_id=survey_id).first()
+			if survey:
+				survey.completion_timestamp = datetime.utcnow()
+				try:
+					db.session.commit()
+				except SQLAlchemy.exc.IntegrityError:
+					db.session.rollback()
 			return redirect(url_for('thank_you'))
 
-	else:  # GET request
-		existing_responses = Response.query.filter_by(survey_id=survey_id, question_number=question_number)
-		existing_response = existing_responses.first() if existing_responses else None
-		saved_answer = existing_response.answer if existing_response else ''
 
-	return render_template(f'question_{question_number}.html', question_number=question_number, saved_answer=saved_answer)
+	else:  # GET request
+
+		# Retrieve saved answer from database
+		answer = Answer.query.filter_by(survey_id=survey_id, question_id=question_number).first()
+		if answer:
+			saved_answer = answer.answer_text
+		else:
+			saved_answer = None
+
+		return render_template(f'question_{question_number}.html', next_question_number=next_question_number,
+	                       prev_question_number=prev_question_number, question_number=question_number,
+	                       saved_answer=saved_answer)
+
 
 @app.route('/generate')
 def generate_html():
+	main_question_flow = []
 	# Loop through each question, render HTML, and save to file
 	# record the question working flow in question_flow
 	for index, row in data.iterrows():
-		#any of cell is nan then break
+		# any of cell is nan then break
 		if row.isnull().values.any():
 			continue
 		question_number = (index + 1)
@@ -110,19 +183,19 @@ def generate_html():
 		if question_type == 'Multiple Choice':
 			template_name = 'pre_generate_templates/multiple_choice_template.html'
 			options = response_data
-			question_flow.append(question_number)
+			main_question_flow.append(question_number)
 		elif question_type == 'Short Answer':
 			template_name = 'pre_generate_templates/short_answer_template.html'
 			char_limit_range = (int(response_data[0]), int(response_data[1]))
-			question_flow.append(question_number)
+			main_question_flow.append(question_number)
 		elif question_type == 'Rating Scale':
 			template_name = 'pre_generate_templates/rating_scale_template.html'
 			scale_range = (int(response_data[0]), int(response_data[1]))
-			question_flow.append(question_number)
+			main_question_flow.append(question_number)
 		elif question_type == 'Random Question Set':
 			generate_sub_html(response_data[0])
 			for i in range(int(response_data[1])):
-				question_flow.append(response_data[0])
+				main_question_flow.append(response_data[0])
 			continue
 		else:
 			return "Error: Invalid question type." + str(question_number)
@@ -142,14 +215,22 @@ def generate_html():
 		with open(f'templates/question_{question_number}.html', 'w') as file:
 			file.write(html_content)
 
+	# write the question flow to file
+	with open(f'output/question_flow.txt', 'w') as file:
+		file.write(str(main_question_flow))
 
 	return "HTML files generated successfully."
-def generate_sub_html(question_file):
 
-	if question_file in question_data_set:
+
+def generate_sub_html(question_file):
+	if question_file in survey_numbers_map:
 		return
-	question_data_set.append(question_file)
-	base_question_number = (question_data_set.index(question_file) + 1) * MAX_QUESTIONS
+	question_pool = []
+
+	if not question_file in survey_numbers_map:
+		survey_numbers_map[question_file] = question_pool
+	index_of_key: int = list(survey_numbers_map.keys()).index(question_file)
+	base_question_number = (index_of_key + 1) * MAX_QUESTIONS
 
 	# Load CSV file
 	data = pd.read_csv(f'data/{question_file}.csv', delimiter=';')
@@ -158,7 +239,7 @@ def generate_sub_html(question_file):
 	for index, row in data.iterrows():
 		if row.isnull().values.any():
 			continue
-		question_number=base_question_number + index + 1
+		question_number = base_question_number + index + 1
 		question_type = row['Type']
 		context = row['Context']
 		question_text = row['Question']
@@ -192,9 +273,34 @@ def generate_sub_html(question_file):
 		with open(f'templates/question_{question_number}.html', 'w') as file:
 			file.write(html_content)
 
+		question_pool.append(question_number)
+	survey_numbers_map[question_file] = question_pool
 
-# Create a model for responses
-from datetime import datetime
+
+def generate_question_ids(survey_id):
+	question_flow = main_question_flow
+	# if question_flow is empty list, read the question flow from file
+	if not question_flow:
+		# read the question flow from file and store in question_flow
+		with open(f'output/question_flow.txt', 'r') as file:
+			question_flow = eval(file.read())
+	# iterate through question_flow and generate question_ids
+	question_ids = []
+	for element in question_flow:
+		if isinstance(element, int):
+			question_ids.append(element)
+		elif isinstance(element, str):
+			# search the survey_numbers_map
+			if element in survey_numbers_map:
+				questions_pool = survey_numbers_map.get(element)
+				# random pick one number in questions_pool which is not in question_ids
+				question_id = random.choice(questions_pool)
+				while question_id in question_ids:
+					question_id = random.choice(questions_pool)
+				question_ids.append(question_id)
+
+	return question_ids
+
 
 class Survey(db.Model):
 	__tablename__ = 'survey'
@@ -204,12 +310,15 @@ class Survey(db.Model):
 	start_timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)  # User's first entry time
 	completion_timestamp = db.Column(db.DateTime)  # Timestamp when the user completed the survey
 
+
 class RandomQuestionSet(db.Model):
 	__tablename__ = 'random_question_set'
 
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	survey_id = db.Column(db.String, db.ForeignKey('survey.survey_id'), nullable=False)
-	question_ids = db.Column(db.String, nullable=False)  # This can store a comma-separated list of question IDs or be structured differently based on requirements
+	question_ids = db.Column(db.String,
+	                         nullable=False)  # This can store a comma-separated list of question IDs or be structured differently based on requirements
+
 
 class Answer(db.Model):
 	__tablename__ = 'answer'
@@ -218,12 +327,10 @@ class Answer(db.Model):
 	survey_id = db.Column(db.String, db.ForeignKey('survey.survey_id'), nullable=False)
 	question_id = db.Column(db.Integer, nullable=False)  # Assuming question IDs are integers. Adjust as needed.
 	answer_text = db.Column(db.String, nullable=False)
-	answer_timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)  # Timestamp when the question was answered
+	answer_timestamp = db.Column(db.DateTime, nullable=False,
+	                             default=datetime.utcnow)  # Timestamp when the question was answered
 
 	__table_args__ = (db.UniqueConstraint('survey_id', 'question_id', name='uq_survey_question'),)
-
-
-TEST_ENVIRONMENT = False
 
 
 @app.route('/thank_you')
@@ -231,10 +338,12 @@ def thank_you():
 	return "Thank you for submitting your responses!"
 
 
+TEST_ENVIRONMENT = True
+
 if __name__ == '__main__':
 	with app.app_context():
 		db.create_all()  # Create tables on startup
 	if TEST_ENVIRONMENT:
 		app.run(debug=True)
 	else:
-		app.run(host="0.0.0.0", port=5000, debug=True)
+		app.run(host="0.0.0.0", port=80, debug=True)
