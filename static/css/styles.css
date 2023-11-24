@@ -99,10 +99,28 @@ body {
     display: inline-block;  /* Make the anchor tag behave like a button */
 }
 
-.button:hover {
-    background-color: #005f5f;  /* Darker blue on hover */
+/* Style for enabled button */
+.button-enabled {
+    padding: 10px 20px;
+    border: none;
+    background-color: #008CBA; /* Blue background */
+    color: white;
+    cursor: pointer;
+    border-radius: 4px; /* Rounded corners */
+    text-decoration: none; /* Remove underline from the anchor tag */
+    display: inline-block; /* Make the anchor tag behave like a button */
 }
 
+.button-enabled:hover {
+    background-color: #005f5f; /* Darker blue on hover */
+}
+
+.button:disabled {
+    background-color: #cccccc; /* Gray background for disabled state */
+    color: #666666; /* Dark gray text color */
+    cursor: not-allowed; /* Cursor to indicate the button is disabled */
+    /* No need to repeat other styles that don't change */
+}
 
 /* survey_id_entry_page*/
 /* Styling for the label */
