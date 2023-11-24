@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Thank You For Your Participation</title>
+    <!-- You can add CSS links or other metadata here -->
 </head>
 <body>
-$END$
+<h1>Thank You For Your Participation</h1>
+<p>We thank you for your time spent participating in this study!</p>
+<p>Your response has been recorded. You will be redirected back to Prolific in <span id="countdown">3</span> seconds. Please do not close your window.</p>
+<p>If you are having trouble being redirected to Prolific, you can copy and paste this code on Prolific: <strong>CIDZB9W8</strong></p>
+
+<script>
+    var countdownNumber = 3;
+    var countdownElement = document.getElementById('countdown');
+
+    var countdownInterval = setInterval(function() {
+        countdownNumber--;
+        countdownElement.textContent = countdownNumber;
+
+        if (countdownNumber <= 0) {
+            clearInterval(countdownInterval);
+            window.location.href = 'https://app.prolific.com/submissions/complete?cc=CIDZB9W8';
+        }
+    }, 1000);
+</script>
+
+<link rel="stylesheet" href="/static/css/styles.css">
+
 </body>
 </html>

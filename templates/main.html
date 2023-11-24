@@ -1,10 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>Research Survey on Anti-Asian Hate Speech</title>
 </head>
+
 <body>
-$END$
+<div class="questionnaire-container">
+  <div class="context">
+    <h2>Consent Form for Research on Anti-Asian Hate Speech</h2>
+    <embed src="{{ url_for('static', filename='docs/Consent-form.pdf') }}" type="application/pdf" width="100%" height="600px">
+  </div>
+
+  <form id="surveyForm">
+    <div class="question">
+      <label>I confirm that I provide my consent to participate in the study:</label>
+    </div>
+    <div class="answer">
+      <input type="radio" id="consentYes" name="consent" value="Yes" required>
+      <label for="consentYes">Yes, I provide consent.</label><br>
+      <input type="radio" id="consentNo" name="consent" value="No">
+      <label for="consentNo">No, I don’t provide consent.</label>
+    </div>
+
+    <div class="question">
+      <label>I confirm that I am eligible to participate in the study:</label>
+    </div>
+    <div class="answer">
+      <input type="radio" id="eligibilityYes" name="eligibility" value="Yes" required>
+      <label for="eligibilityYes">Yes, I am eligible.</label><br>
+      <input type="radio" id="eligibilityNo" name="eligibility" value="No">
+      <label for="eligibilityNo">No, I am not eligible.</label>
+    </div>
+
+    <div class="navigation">
+      <input type="submit" value="Next" id="submitButton" class="button" disabled>
+    </div>
+  </form>
+</div>
+
+<link rel="stylesheet" href="/static/css/styles.css">
+<script src="/static/js/script.js"></script>
 </body>
 </html>
