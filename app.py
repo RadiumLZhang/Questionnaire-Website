@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+import shlex
 
 from datetime import datetime
 from collections import OrderedDict
@@ -21,9 +22,15 @@ MAX_QUESTIONS = 1000
 @app.route('/', methods=['GET', 'POST'])
 def index():
 	if request.method == 'GET':
-		return render_template('survey_id_entry.html')
+		return render_template('main.html')
 	elif session['survey_id']:
 		return redirect(url_for('question', question_number=1))
+
+
+
+@app.route('/survey_id_entry')
+def survey_id_entry():
+	return render_template('survey_id_entry.html')
 
 
 @app.route('/enter_survey_id', methods=['GET', 'POST'])
@@ -221,6 +228,14 @@ def generate_html():
 	return "HTML files generated successfully."
 
 
+def split_respecting_quotes(input_str):
+	# Use shlex to split the string, respecting quoted sections
+	lexer = shlex.shlex(input_str, posix=True)
+	lexer.whitespace = ','  # Set comma as the delimiter
+	lexer.whitespace_split = True
+	lexer.quotechars = '"'  # Only consider double quotes
+	return list(lexer)
+
 def generate_sub_html(question_file):
 	if question_file in main_survey_numbers_map:
 		return
@@ -344,10 +359,9 @@ class Answer(db.Model):
 
 @app.route('/thank_you')
 def thank_you():
-	return "Thank you for submitting your responses!"
+	return render_template('thank_you.html')
 
-
-TEST_ENVIRONMENT = False
+TEST_ENVIRONMENT = True
 
 if __name__ == '__main__':
 	with app.app_context():
