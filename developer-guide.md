@@ -35,6 +35,8 @@ Questionnaire-Website/        # Root directory of project
 ├── static/                    # Directory for static files like CSS and JavaScript
 │   ├── css/                   # Stylesheets directory
 │   │   └── styles.css         # Main stylesheet for the application
+│   └── docs/
+│       └── Consent-form.pdf
 │   └── js/                    # JavaScript files directory
 │       └── script.js          # Main client-side script
 │
