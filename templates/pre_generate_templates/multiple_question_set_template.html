@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey Questions</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+<div class="questionnaire-container">
+  <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">
+  {% for question in questions %}
+    <div class="question-container">
+      <div class="context">{{ question.context }}</div>
+      <div class="question">
+        <p>{{ question.question_text }}</p>
+      </div>
+      <div class="answer">
+        <!-- Adjust the input type based on question type -->
+        {% if question.type == 'Short Answer' %}
+        <textarea name="answer_{{ question.id }}" minlength="{{ question.char_limit_range[0] }}" maxlength="{{ question.char_limit_range[1] }}" required></textarea>
+        {% elif question.type == 'Multiple Choice' %}
+        {% for option in question.options %}
+        <input type="radio" name="answer_{{ question.id }}" value="{{ option }}" id="answer{{ loop.index }}"
+               {% if loop.first %}required{% endif %}
+               {% if option == saved_answer %}checked{% endif %}>
+        <label for="answer{{ loop.index }}">{{ option }}</label>
+        <br>
+        {% endfor %}
+        {% elif question.type == 'Rating Scale' %}
+        {% for i in range(question.scale_range[0], question.scale_range[1] + 1) %}
+        <input type="radio" name="answer_{{ question.id }}" value="{{ i }}" id="rating{{ i }}" required
+               {% if i|string == saved_answer %}checked{% endif %}>
+        <label for="rating{{ i }}">{{ i }}</label>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    <div class="navigation">
+
+      {% raw %}
+      <!-- Back Button -->
+      {% if prev_question_number %}
+      <a href="{{ url_for('question', question_number=prev_question_number) }}" class="button" id="back-button">Back</a>
+      {% endif %}
+
+      <!-- Next Button -->
+      <button type="submit" name="action" value="Submit" class="button" id="submit-button">Next</button>
+
+      {% endraw %}
+
+
+    </div>
+  </form>
+</div>
+
+<div style="position: fixed; left: 0; right: 0; bottom: 0; background-color: #f9f9f9; font-size: 12px; border-top: 1px solid #ccc; padding: 10px; text-align: center; box-sizing: border-box;">
+  <strong>Important Resources:</strong>
+  <p>If you experience stress, anxiety, or emotional distress, reach out to a professional:</p>
+  <ul style="list-style: none; padding: 0; margin: 0; display: inline-block; text-align: left;">
+    <li>7 Cups of Tea: <a href="http://www.7cupsoftea.com" target="_blank">www.7cupsoftea.com</a></li>
+    <li>Crisis Hotline: <a href="http://www.iamalive.org" target="_blank">www.iamalive.org</a></li>
+    <li>Crisis Text Line: <a href="http://www.crisistextline.org" target="_blank">www.crisistextline.org</a></li>
+    <li>National Suicide Prevention Lifeline: <a href="tel:1-800-273-8255">1-800-273-8255</a> or <a href="tel:988">988</a></li>
+  </ul>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
