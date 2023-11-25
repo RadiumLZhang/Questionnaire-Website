@@ -130,7 +130,7 @@ def question(question_number):
 			for key, answer_text in request.form.items():
 				if key.startswith('answer_'):
 					question_id = key.split('_')[1]
-					process_answer(survey_id, int(question_number)*str(question_id), answer_text)
+					process_answer(survey_id, int(question_number)*int(question_id), answer_text)
 
 		db.session.commit()
 
