@@ -122,23 +122,16 @@ def question(question_number):
 	prev_question_number = prev_question(question_number)
 
 	if request.method == 'POST':
-		# Retrieve answer from form
-		answer_text = request.form['answer']
+		if 'answer' in request.form:  # Single answer submission
+			answer_text = request.form['answer']
+			process_answer(survey_id, question_number, answer_text)
 
-		existing_answer = Answer.query.filter_by(survey_id=survey_id, question_id=question_number).first()
+		else:  # Multiple answer submission
+			for key, answer_text in request.form.items():
+				if key.startswith('answer_'):
+					question_id = key.split('_')[1]
+					process_answer(survey_id, int(question_number)*str(question_id), answer_text)
 
-		if existing_answer:
-			# Update the existing answer
-			existing_answer.answer_text = answer_text
-			existing_answer.answer_timestamp = datetime.utcnow()
-		else:
-			# Create a new answer record
-			answer = Answer(survey_id=survey_id, question_id=question_number, answer_text=answer_text,
-			                answer_timestamp=datetime.utcnow())
-			db.session.add(answer)
-
-		# Save answer to database
-		# Commit the changes
 		db.session.commit()
 
 		if next_question_number:
@@ -164,6 +157,18 @@ def question(question_number):
 		return render_template(f'question_{question_number}.html', next_question_number=next_question_number,
 	                       prev_question_number=prev_question_number, question_number=question_number, saved_answer = saved_answer)
 
+
+def process_answer(survey_id, question_id, answer_text):
+	existing_answer = Answer.query.filter_by(survey_id=survey_id, question_id=question_id).first()
+
+	if existing_answer:
+		if not existing_answer.answer_text == answer_text:
+			existing_answer.answer_text = answer_text
+			existing_answer.answer_timestamp = datetime.utcnow()
+	else:
+		answer = Answer(survey_id=survey_id, question_id=question_id, answer_text=answer_text,
+		                answer_timestamp=datetime.utcnow())
+		db.session.add(answer)
 
 @app.route('/generate')
 def generate_html():
@@ -195,10 +200,14 @@ def generate_html():
 			scale_range = (int(response_data[0]), int(response_data[1]))
 			main_question_flow.append(question_number)
 		elif question_type == 'Random Question Set':
-			generate_sub_html(response_data[0])
+			generate_random_question_sub_html(response_data[0])
 			for i in range(int(response_data[1])):
 				main_question_flow.append(response_data[0])
 			continue
+		elif question_type == 'Multiple Question Set':
+			template_name = 'pre_generate_templates/multiple_question_set_template.html'
+			questions = generate_multiple_question_set_questions(response_data[0])
+			main_question_flow.append(question_number)
 		else:
 			return "Error: Invalid question type." + str(question_number)
 
@@ -207,9 +216,10 @@ def generate_html():
 			template_name,
 			context=context,
 			question_text=question_text,
-			options=options if question_type == 'Multiple Choice' else None,
-			char_limit_range=char_limit_range if question_type == 'Short Answer' else None,
-			scale_range=scale_range if question_type == 'Rating Scale' else None,
+			options=response_data if question_type == 'Multiple Choice' else None,
+			char_limit_range=(int(response_data[0]), int(response_data[1])) if question_type == 'Short Answer' else None,
+			scale_range=(int(response_data[0]), int(response_data[1])) if question_type == 'Rating Scale' else None,
+			questions=generate_multiple_question_set_questions(response_data[0]) if question_type == 'Multiple Question Set' else None,
 			question_number=question_number,
 		)
 
@@ -228,15 +238,29 @@ def generate_html():
 	return "HTML files generated successfully."
 
 
-def split_respecting_quotes(input_str):
-	# Use shlex to split the string, respecting quoted sections
-	lexer = shlex.shlex(input_str, posix=True)
-	lexer.whitespace = ','  # Set comma as the delimiter
-	lexer.whitespace_split = True
-	lexer.quotechars = '"'  # Only consider double quotes
-	return list(lexer)
+def generate_multiple_question_set_questions(question_file):
+	data = pd.read_csv(f'data/{question_file}.csv', delimiter=';')
+	questions = []
+	for index, row in data.iterrows():
+		if row.isnull().values.any():
+			continue
 
-def generate_sub_html(question_file):
+		id = index + 1
+		question_type = row['Type']
+		context = row['Context']
+		question_text = row['Question']
+		response_data = row['Response'].split(',')
+		questions.append({
+			'id': id,
+			'context': context,
+			'question_text': question_text,
+			'type': question_type,
+			'options': response_data if question_type == 'Multiple Choice' else None,
+			'char_limit_range': (int(response_data[0]), int(response_data[1])) if question_type == 'Short Answer' else None,
+			'scale_range':  (int(response_data[0]), int(response_data[1])) if question_type == 'Rating Scale' else None,
+		})
+	return questions
+def generate_random_question_sub_html(question_file):
 	if question_file in main_survey_numbers_map:
 		return
 	question_pool = []
