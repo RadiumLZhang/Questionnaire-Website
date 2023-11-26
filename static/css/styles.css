@@ -27,6 +27,7 @@ body {
 .question,
 .answer,
 .navigation {
+    position: relative;
     margin-bottom: 20px;  /* Space out sections */
 }
 
@@ -118,12 +119,64 @@ body {
     background-color: #005f5f; /* Darker blue on hover */
 }
 
-.button:disabled {
+#submitButton {
+    position: relative; /* Ensure relative positioning for the tooltip */
+    /* Other styles for your button */
+}
+
+#submitButton:disabled {
     background-color: #cccccc; /* Gray background for disabled state */
     color: #666666; /* Dark gray text color */
     cursor: not-allowed; /* Cursor to indicate the button is disabled */
-    /* No need to repeat other styles that don't change */
 }
+
+#submitButton:disabled:hover {
+    cursor: help; /* Change cursor to pointer to indicate clickable */
+}
+
+.help-icon {
+    cursor: help;
+    display: none; /* Initially hidden */
+    position: absolute;
+    margin-left: 5px; /* Adjust as needed */
+    top: 50%; /* Align vertically */
+    transform: translateY(-50%); /* Center vertically relative to the button */
+    width: 20px; /* Width of the clickable area */
+    height: 20px; /* Height of the clickable area */
+    background: transparent; /* Make it invisible */
+    border-radius: 50%; /* Optional: makes the clickable area circular */
+}
+
+.tooltip {
+    display: none;
+    position: absolute;
+    background-color: #fff3cd; /* Light yellow background */
+    border: 1px solid #ffeeba; /* Light yellow border */
+    color: #856404; /* Dark text color */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-size: 14px;
+}
+
+.tooltip:before {
+    content: "\26A0"; /* Unicode for exclamation mark in a triangle */
+    color: #ffcc00; /* Orange color for the icon */
+    font-size: 18px;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Adjust the position of the tooltip text to not overlap the icon */
+.tooltip .tooltip-text {
+    padding-left: 30px;
+}
+
+
+
 
 /* survey_id_entry_page*/
 /* Styling for the label */

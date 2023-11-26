@@ -33,9 +33,16 @@
       <label for="eligibilityNo">No, I am not eligible.</label>
     </div>
 
-    <div class="navigation">
+    <div class="navigation" id="navigation">
       <input type="submit" value="Next" id="submitButton" class="button" disabled>
+      <span class="help-icon" onclick="showHelp()"></span>
+      <div id="tooltip" class="tooltip">
+        <div class="tooltip-text">
+          Please provide consent and confirm eligibility before proceeding.
+        </div>
+      </div>
     </div>
+
   </form>
 </div>
 
