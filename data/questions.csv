@@ -1,5 +1,7 @@
 Type;Context;Question;Response
-Multiple Choice;These chinese eats Koalas too?? wtf I wish all those eaters are dead!!!!;"What is your favorite color?""";Red,Green,Blue,Yellow
-Short Answer;If not take down the Chinese Communist Party ,various viruses will follow, because this virus is the CCP biological and chemical weapon, the CCP is poisoning the world, please don't be silent.;Please describe your ideal vacation.;50,5000
-Rating Scale;Thank you for saving me from those North Koreans man they had me locked up trying to force feed me corona virus.;Rate 1-10 blablah;1,10
-Random Question Set;Now continue next section;In this section u will see 5 questions, please make your choice;survey, 5
+Multiple Question Set; ; ;demographic
+Multiple Choice;"Task: Please carefully read each statement provided and rate the perceived level of harmfulness for each instance of anti-Asian hate speech. You will be asked to rate each statement on a scale from 0 to 5, with 0 indicating ""Not Harmful"" and 5 indicating ""Extremely Harmful.""";Harmfulness can result in, but not limited to, feelings of realistic threats (e.g., mental or physical wellbeing), symbolic threats (e.g., challenging your morals and values), intergroup anxiety (e.g., concerns of being embarrassed, rejected, or ridiculed), and negative stereotypes (e.g., unfair or negative expectations or generalizations).;Agree
+Random Question Set; ; ;survey, 5
+Short Answer;Considering the previous questions, how do you define and assess harm in online content? Feel free to share your perspectives on the potential consequences it may cause and the individuals or groups it might influence.; ;50,1000
+Random Question Set; ; ;survey, 5
+Short Answer;Please explain why you find certain statements more harmful, providing at least three factors. You are encouraged to reference previously rated posts as examples to support your explanation.; ;50,1000
