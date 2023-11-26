@@ -19,19 +19,49 @@
       <div class="answer">
         <!-- Adjust the input type based on question type -->
         {% if question.type == 'Short Answer' %}
-        <textarea name="answer_{{ question.id }}" minlength="{{ question.char_limit_range[0] }}" maxlength="{{ question.char_limit_range[1] }}" required></textarea>
+        <textarea name="answer_{{ question.id }}" minlength="{{ question.char_limit_range[0] }}"
+                  maxlength="{{ question.char_limit_range[1] }}" required>{% raw %}{{saved_answer[{% endraw %}
+              {{question.id}}
+        {% raw %}]}}{% endraw %}</textarea>
         {% elif question.type == 'Multiple Choice' %}
         {% for option in question.options %}
-        <input type="radio" name="answer_{{ question.id }}" value="{{ option }}" id="answer{{ loop.index }}"
+        <input type="radio" name="answer_{{ question.id }}" value="{{option}}" id="answer{{ loop.index }}"
                {% if loop.first %}required{% endif %}
-               {% if option == saved_answer %}checked{% endif %}>
-        <label for="answer{{ loop.index }}">{{ option }}</label>
+               {% raw %}
+               {% if
+               {% endraw %}
+                "{{option}}"
+                {% raw %}
+                == saved_answer
+        {% endraw %}
+        [{{question.id}}]
+        {% raw %}
+        %}checked{% endif %}
+                {% endraw %}
+                >
+        <label for="answer{{ loop.index }}">{{option}}</label>
         <br>
         {% endfor %}
         {% elif question.type == 'Rating Scale' %}
         {% for i in range(question.scale_range[0], question.scale_range[1] + 1) %}
         <input type="radio" name="answer_{{ question.id }}" value="{{ i }}" id="rating{{ i }}" required
-               {% if i|string == saved_answer %}checked{% endif %}>
+              {% raw %}
+              {% if
+              {% endraw %}
+
+                "{{i}}"
+
+                {% raw %}
+              == saved_answer
+              {% endraw %}
+
+          [{{question.id}}]
+
+          {% raw %}
+                %}checked
+              {% endif %}
+              {% endraw %}
+              >
         <label for="rating{{ i }}">{{ i }}</label>
         {% endfor %}
         {% endif %}

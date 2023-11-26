@@ -127,10 +127,16 @@ def question(question_number):
 			process_answer(survey_id, question_number, answer_text)
 
 		else:  # Multiple answer submission
+			combined_answer = ""
 			for key, answer_text in request.form.items():
 				if key.startswith('answer_'):
-					question_id = key.split('_')[1]
-					process_answer(survey_id, int(question_number)*int(question_id), answer_text)
+					question_id = key.split('_')[1]  # Extract the question ID from the key
+					combined_answer += f"{question_id}:{answer_text}||"  # Format: "question_id:answer||"
+
+			combined_answer = combined_answer[:-2]  # Remove the last "||"
+			# Process the combined answer
+			process_answer(survey_id, question_number, combined_answer)
+
 
 		db.session.commit()
 
@@ -144,18 +150,34 @@ def question(question_number):
 				db.session.commit()
 			return redirect(url_for('thank_you'))
 
-
 	else:  # GET request
-
 		# Retrieve saved answer from database
-		answer = Answer.query.filter_by(survey_id=survey_id, question_id=question_number).first()
-		saved_answer = ''
-		if answer:
-			saved_answer = answer.answer_text
-
+		answer_record = Answer.query.filter_by(survey_id=survey_id, question_id=question_number).first()
+		saved_answer = []
+		if answer_record:
+			# Assuming 'answer_record.answer_text' contains the answer string
+			saved_answer = parse_answer(answer_record.answer_text)
 
 		return render_template(f'question_{question_number}.html', next_question_number=next_question_number,
-	                       prev_question_number=prev_question_number, question_number=question_number, saved_answer = saved_answer)
+		                       prev_question_number=prev_question_number, question_number=question_number,
+		                       saved_answer=saved_answer)
+
+def parse_answer(answer_text):
+	# Check if the answer contains the "||" separator
+	if "||" in answer_text:
+		# Split the combined answer into segments
+		segments = answer_text.split("||")
+		parsed_answers = {}
+		for segment in segments:
+			if segment:  # Check if the segment is not empty
+				parts = segment.split(":")
+				if len(parts) == 2:
+					question_id, answer = parts
+					parsed_answers[int(question_id)] = answer
+		return parsed_answers
+	else:
+		# Direct answer without question ID
+		return [answer_text]
 
 
 def process_answer(survey_id, question_id, answer_text):

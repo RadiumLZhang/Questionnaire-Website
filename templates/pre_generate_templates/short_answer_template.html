@@ -18,7 +18,7 @@
     <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">
 		
 		<div class="answer">
-			<textarea name="answer" id="answer" minlength="{{ char_limit_range[0] }}" maxlength="{{ char_limit_range[1] }}" required>{% raw %}{{ saved_answer }}{% endraw %}</textarea>
+			<textarea name="answer" id="answer" minlength="{{ char_limit_range[0] }}" maxlength="{{ char_limit_range[1] }}" required>{% raw %}{{ saved_answer[0] }}{% endraw %}</textarea>
 		</div>
 		<div class="navigation">
 			{% raw %}

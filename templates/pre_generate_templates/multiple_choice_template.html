@@ -18,17 +18,18 @@
 	    <form action="{{ url_for('question', question_number=question_number) }}" method="post" id="question-form">    
 	        <div class="answers">
 			    {% for option in options %}
-				    <input type="radio" name="answer" value="{{ option }}" id="answer{{ loop.index }}"
+				    <input type="radio" name="answer" value="{{option}}" id="answer{{ loop.index }}"
 				           {% if loop.first %}required{% endif %}
 						   {% raw %}
 						   {% if
 						   {% endraw %}
 						   "{{option}}"
 						   {% raw %}
-								   == saved_answer %}checked{% endif %}
+								   == saved_answer[0] %}checked
+							{% endif %}
 						   {% endraw %}
 						   >
-				    <label for="answer{{ loop.index }}">{{ option }}</label>
+				    <label for="answer{{ loop.index }}">{{option}}</label>
 				    <br>
 				{% endfor %}
 			</div>
