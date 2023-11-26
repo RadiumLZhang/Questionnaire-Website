@@ -16,6 +16,7 @@ db = SQLAlchemy(app)
 
 main_survey_numbers_map = OrderedDict()
 main_question_flow = []
+check_question_dict = {}
 MAX_QUESTIONS = 1000
 
 
@@ -68,7 +69,7 @@ def enter_survey_id():
 		db.session.commit()
 
 		# Generate random question set and store in database
-		question_ids = generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow)
+		question_ids = generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow, check_question_dict)
 		random_question_set = RandomQuestionSet(survey_id=survey_id, question_ids=','.join(map(str, question_ids)))
 		db.session.add(random_question_set)
 		db.session.commit()
@@ -208,6 +209,10 @@ def generate_html():
 		question_text = row['Question']
 		response_data = row['Response'].split(',')
 
+		options = None
+		char_limit_range = None
+		scale_range = None
+
 		# Select template based on question type
 		if question_type == 'Multiple Choice':
 			template_name = 'pre_generate_templates/multiple_choice_template.html'
@@ -230,6 +235,25 @@ def generate_html():
 			template_name = 'pre_generate_templates/multiple_question_set_template.html'
 			questions = generate_multiple_question_set_questions(response_data[0])
 			main_question_flow.append(question_number)
+		elif question_type == 'Attention Check':
+			# for attention check it works like normal question
+			# variable response_data[0] is the correct answer
+			# then response_data[..] follows with the question type, and the needed data
+			sub_question_type = response_data[1]
+			correct_answer = response_data[0]
+			# trim the leading space and trailing space of response_data[1]
+			response_data[1] = response_data[1].strip()
+			if response_data[1] == 'Multiple Choice':
+				template_name = 'pre_generate_templates/multiple_choice_template.html'
+				options = response_data[2:]
+			elif response_data[1] == 'Short Answer':
+				template_name = 'pre_generate_templates/short_answer_template.html'
+				char_limit_range = (int(response_data[2]), int(response_data[3]))
+			elif response_data[1] == 'Rating Scale':
+				template_name = 'pre_generate_templates/rating_scale_template.html'
+				scale_range = (int(response_data[2]), int(response_data[3]))
+			main_question_flow.append(question_number)
+			check_question_dict[question_number] = correct_answer
 		else:
 			return "Error: Invalid question type." + str(question_number)
 
@@ -238,9 +262,9 @@ def generate_html():
 			template_name,
 			context=context,
 			question_text=question_text,
-			options=response_data if question_type == 'Multiple Choice' else None,
-			char_limit_range=(int(response_data[0]), int(response_data[1])) if question_type == 'Short Answer' else None,
-			scale_range=(int(response_data[0]), int(response_data[1])) if question_type == 'Rating Scale' else None,
+			options=options,
+			char_limit_range=char_limit_range,
+			scale_range=scale_range,
 			questions=generate_multiple_question_set_questions(response_data[0]) if question_type == 'Multiple Question Set' else None,
 			question_number=question_number,
 		)
@@ -257,6 +281,8 @@ def generate_html():
 	with open(f'output/survey_numbers_map.txt', 'w') as file:
 		file.write(str(main_survey_numbers_map))
 
+	with open(f'output/check_question_dict.txt', 'w') as file:
+		file.write(str(check_question_dict))
 	return "HTML files generated successfully."
 
 
@@ -338,7 +364,7 @@ def generate_random_question_sub_html(question_file):
 
 
 
-def generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow):
+def generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow, check_question_dict):
 	question_flow = main_question_flow
 	survey_numbers_map = main_survey_numbers_map
 	# if question_flow is empty list, read the question flow from file
@@ -353,6 +379,10 @@ def generate_question_ids(survey_id, main_survey_numbers_map, main_question_flow
 		with open(f'output/survey_numbers_map.txt', 'r') as file:
 			survey_numbers_map = eval(file.read())
 			main_survey_numbers_map = survey_numbers_map
+
+	if not check_question_dict:
+		with open(f'output/check_question_dict.txt', 'r') as file:
+			check_question_dict = eval(file.read())
 
 	# iterate through question_flow and generate question_ids
 	question_ids = []
@@ -405,7 +435,16 @@ class Answer(db.Model):
 
 @app.route('/thank_you')
 def thank_you():
-	return render_template('thank_you.html')
+	# check all the questions in the check_question_dict has the correct answer
+	survey_id = session.get('survey_id')
+	for question_id, correct_answer in check_question_dict.items():
+		answer_record = Answer.query.filter_by(survey_id=survey_id, question_id=question_id).first()
+		if not answer_record:
+			render_template('thank_you.html', prolific_id="C2KTRG8D")
+		if answer_record.answer_text.strip() != correct_answer.strip():
+			return render_template('thank_you.html', prolific_id="C2KTRG8D")
+
+	return render_template('thank_you.html', prolific_id="CIDZB9W8")
 
 TEST_ENVIRONMENT = True
 

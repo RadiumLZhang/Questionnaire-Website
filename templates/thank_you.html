@@ -9,7 +9,7 @@
 <h1>Thank You For Your Participation</h1>
 <p>We thank you for your time spent participating in this study!</p>
 <p>Your response has been recorded. You will be redirected back to Prolific in <span id="countdown">3</span> seconds. Please do not close your window.</p>
-<p>If you are having trouble being redirected to Prolific, you can copy and paste this code on Prolific: <strong>CIDZB9W8</strong></p>
+<p>If you are having trouble being redirected to Prolific, you can copy and paste this code on Prolific: <strong>{{ prolific_id }}</strong></p>
 
 <script>
     var countdownNumber = 3;
@@ -21,7 +21,7 @@
 
         if (countdownNumber <= 0) {
             clearInterval(countdownInterval);
-            window.location.href = 'https://app.prolific.com/submissions/complete?cc=CIDZB9W8';
+            window.location.href = 'https://app.prolific.com/submissions/complete?cc={{ prolific_id }}';
         }
     }, 1000);
 </script>
