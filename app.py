@@ -446,7 +446,7 @@ def thank_you():
 
 	return render_template('thank_you.html', prolific_id="CIDZB9W8")
 
-TEST_ENVIRONMENT = True
+TEST_ENVIRONMENT = False
 
 if __name__ == '__main__':
 	with app.app_context():
